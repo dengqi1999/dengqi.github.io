@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Mockito mock一个方法主要是通过继承指定类，然后覆写对应的类，来达到逻辑控制的目的。但是对应final和static方法时没有办法通过继承来控制对应方法的逻辑的。所以我这里去查看了相关的一些源码，来查看相应的一些原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mockito怎么mock final方法和static方法">
+<meta property="og:url" content="http://example.com/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="探索真相的小白">
+<meta property="og:description" content="Mockito mock一个方法主要是通过继承指定类，然后覆写对应的类，来达到逻辑控制的目的。但是对应final和static方法时没有办法通过继承来控制对应方法的逻辑的。所以我这里去查看了相关的一些源码，来查看相应的一些原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Mockito-final-static%E5%8E%9F%E7%90%86-%E5%9B%BE1.jpg">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Mockito-final-static%E5%8E%9F%E7%90%86-%E5%9B%BE2.jpg">
+<meta property="article:published_time" content="2022-03-06T12:07:02.000Z">
+<meta property="article:modified_time" content="2022-03-06T12:19:48.647Z">
+<meta property="article:author" content="邓琦">
+<meta property="article:tag" content="单元测试框架">
+<meta property="article:tag" content="Mockito">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Mockito-final-static%E5%8E%9F%E7%90%86-%E5%9B%BE1.jpg">
+
+<link rel="canonical" href="http://example.com/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mockito怎么mock final方法和static方法 | 探索真相的小白</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">探索真相的小白</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="邓琦">
+      <meta itemprop="description" content="学习源码，才能学习到最“纯正”的技术原理">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="探索真相的小白">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mockito怎么mock final方法和static方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-06 20:07:02 / 修改时间：20:19:48" itemprop="dateCreated datePublished" datetime="2022-03-06T20:07:02+08:00">2022-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mockito%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">Mockito相关源码</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Mockito mock一个方法主要是通过继承指定类，然后覆写对应的类，来达到逻辑控制的目的。但是对应final和static方法时没有办法通过继承来控制对应方法的逻辑的。所以我这里去查看了相关的一些源码，来查看相应的一些原理。</p>
+<span id="more"></span>
+
+<p>测试代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public final class TestDate &#123;</span><br><span class="line"></span><br><span class="line">    int i = 0;</span><br><span class="line"></span><br><span class="line">    public final int getI() &#123;</span><br><span class="line">        return i;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static String getName() &#123;</span><br><span class="line">        return &quot;dengqi&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">public class FinalTest &#123;</span><br><span class="line">    @Test</span><br><span class="line">    public void test1() &#123;</span><br><span class="line">        TestDate testDate = mock(TestDate.class);</span><br><span class="line">        int i = testDate.getI();</span><br><span class="line">        assertEquals(0, i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Test</span><br><span class="line">    public void test2() &#123;</span><br><span class="line">        TestDate testDate = mock(TestDate.class);</span><br><span class="line">        when(testDate.getI()).thenReturn(100);</span><br><span class="line">        int i = testDate.getI();</span><br><span class="line">        assertEquals(100, i);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @Test</span><br><span class="line">    public void testGetName() throws InterruptedException &#123;</span><br><span class="line">        try (MockedStatic&lt;TestDate&gt; theMock = Mockito.mockStatic(TestDate.class)) &#123;</span><br><span class="line">            theMock.when(TestDate::getName).thenReturn(&quot;test&quot;);</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line"></span><br><span class="line">            Thread thread = new Thread(() -&gt;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName())</span><br><span class="line">            );</span><br><span class="line">            thread.start();</span><br><span class="line">            thread.join();</span><br><span class="line"></span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Mock-Final"><a href="#Mock-Final" class="headerlink" title="Mock Final"></a>Mock Final</h2><p>Mockito的基本原理是通过生成代理类的子类来控制方法的执行行为，但是因为final关键字标记类没有办法生成子类，所以这种方法并不适用。所以Mockito采用了另一种方案。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Mockito-final-static%E5%8E%9F%E7%90%86-%E5%9B%BE1.jpg" alt="image"></p>
+<p>从图中可以看出，生成子类的方案中，核心的是MockMethodInterceptor这个属性，它是默认添加到生成的子类中，而final类无法生成子类，所以Mockito选择生成Final类本身，然后通过一个Map来存储final类和MockMethodInterceptor的对应关系。<br>核心调用链路：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mockito.mock()-&gt;MockitoCore.mock()-&gt;MockitoCore.createMock()-&gt;InlineByteBuddyMockMaker.createMock()-&gt;InlineDelegateByteBuddyMockMaker.doCreateMock()</span><br></pre></td></tr></table></figure>
+<p>下面是InlineDelegateByteBuddyMockMaker的源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">class InlineDelegateByteBuddyMockMaker implements ClassCreatingMockMaker, InlineMockMaker, Instantiator &#123;</span><br><span class="line">    // 存储final对象和对应MockMethodInterceptor的关系</span><br><span class="line">    private final WeakConcurrentMap&lt;Object, MockMethodInterceptor&gt; mocks = new WeakConcurrentMap.WithInlinedExpunction&lt;Object, MockMethodInterceptor&gt;();</span><br><span class="line">    </span><br><span class="line">    private &lt;T&gt; T doCreateMock(MockCreationSettings&lt;T&gt; settings, MockHandler handler, boolean nullOnNonInlineConstruction) &#123;</span><br><span class="line">        Class&lt;? extends T&gt; type = createMockType(settings);</span><br><span class="line">        try &#123;</span><br><span class="line">            T instance;</span><br><span class="line">            // 根据不同的条件去创建final对象</span><br><span class="line">            if (settings.isUsingConstructor()) &#123;</span><br><span class="line">                instance = new ConstructorInstantiator(settings.getOuterClassInstance() != null, settings.getConstructorArgs()).newInstance(type);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    instance = newInstance(type);</span><br><span class="line">                &#125; catch (InstantiationException ignored) &#123;</span><br><span class="line">                    if (nullOnNonInlineConstruction) &#123;</span><br><span class="line">                        return null;</span><br><span class="line">                    &#125;</span><br><span class="line">                    Instantiator instantiator = Plugins.getInstantiatorProvider().getInstantiator(settings);</span><br><span class="line">                    instance = instantiator.newInstance(type);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            // 创建对应的MockMethodInterceptor</span><br><span class="line">            MockMethodInterceptor mockMethodInterceptor =</span><br><span class="line">                    new MockMethodInterceptor(handler, settings);</span><br><span class="line">            // 放到map里面存储对应的关系</span><br><span class="line">            mocks.put(instance, mockMethodInterceptor);</span><br><span class="line">            if (instance instanceof MockAccess) &#123;</span><br><span class="line">                ((MockAccess) instance).setMockitoInterceptor(mockMethodInterceptor);</span><br><span class="line">            &#125;</span><br><span class="line">            // 然后返回对应的对象</span><br><span class="line">            return instance;</span><br><span class="line">        &#125; catch (InstantiationException e) &#123;</span><br><span class="line">            ......</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 获取对应的MockMethodInterceptor中的Handler</span><br><span class="line">    public MockHandler getHandler(Object mock) &#123;</span><br><span class="line">        MockMethodInterceptor interceptor;</span><br><span class="line">        if (mock instanceof Class&lt;?&gt;) &#123;</span><br><span class="line">            Map&lt;Class&lt;?&gt;, MockMethodInterceptor&gt; interceptors = mockedStatics.get();</span><br><span class="line">            interceptor = interceptors != null ? interceptors.get(mock) : null;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            interceptor = mocks.get(mock);</span><br><span class="line">        &#125;</span><br><span class="line">        if (interceptor == null) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            return interceptor.handler;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Mockito-final-static%E5%8E%9F%E7%90%86-%E5%9B%BE2.jpg" alt="image"></p>
+<p>这个图是重复执行了when(testDate.getI()).thenReturn(100)之后，去查对应的map看到的。</p>
+<p>并且Mockito还会修改final类的getI方法，最终成功代理方法。下面是生成的代理类反编译后的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">public final class TestDate &#123;</span><br><span class="line">    int i;</span><br><span class="line"></span><br><span class="line">    public TestDate() &#123;</span><br><span class="line">        if (MockMethodDispatcher.isConstructorMock(&quot;iYgGsWev&quot;, TestDate.class)) &#123;</span><br><span class="line">            super();</span><br><span class="line">            TestDate var10000 = (TestDate)MockMethodDispatcher.handleConstruction(&quot;iYgGsWev&quot;, TestDate.class, this, new Object[0], new String[0]);</span><br><span class="line">            if (var10000 != null) &#123;</span><br><span class="line">                this.i = var10000.i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            super();</span><br><span class="line">            this.i = 0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public final int getI() &#123;</span><br><span class="line">        MockMethodDispatcher var1 = MockMethodDispatcher.get(&quot;iYgGsWev&quot;, this);</span><br><span class="line">        Callable var4 = var1 != null &amp;&amp; var1.isMocked(this) &amp;&amp; !var1.isOverridden(this, TestDate.class.getMethod(&quot;getI&quot;)) ? var1.handle(this, TestDate.class.getMethod(&quot;getI&quot;), new Object[0]) : null;</span><br><span class="line">        int var2 = var4 != null ? 0 : this.i;</span><br><span class="line">        if (var4 != null) &#123;</span><br><span class="line">            var2 = (Integer)var4.call();</span><br><span class="line">        &#125;</span><br><span class="line">        return var2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>所以Mockito最终是利用了ByteBuddy去修改final类对应方法的字节码来实现对应方法的Mock。</p>
+<h2 id="Mock-static"><a href="#Mock-static" class="headerlink" title="Mock static"></a>Mock static</h2><p>Mockito针对static方法的mock比较类似于final类的mock。也是通过map来存储两者的关系，并通过byteBuddy来修改字节码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">class InlineDelegateByteBuddyMockMaker implements ClassCreatingMockMaker, InlineMockMaker, Instantiator &#123;</span><br><span class="line">    </span><br><span class="line">    // 这里并不是一个公用的Map，是一个ThreadLocal的Map</span><br><span class="line">    private final DetachedThreadLocal&lt;Map&lt;Class&lt;?&gt;, MockMethodInterceptor&gt;&gt; mockedStatics =</span><br><span class="line">            new DetachedThreadLocal&lt;&gt;(DetachedThreadLocal.Cleaner.INLINE);</span><br><span class="line">    </span><br><span class="line">    public &lt;T&gt; StaticMockControl&lt;T&gt; createStaticMock(</span><br><span class="line">            Class&lt;T&gt; type, MockCreationSettings&lt;T&gt; settings, MockHandler handler) &#123;</span><br><span class="line">        ......</span><br><span class="line"></span><br><span class="line">        bytecodeGenerator.mockClassStatic(type);</span><br><span class="line"></span><br><span class="line">        Map&lt;Class&lt;?&gt;, MockMethodInterceptor&gt; interceptors = mockedStatics.get();</span><br><span class="line">        if (interceptors == null) &#123;</span><br><span class="line">            interceptors = new WeakHashMap&lt;&gt;();</span><br><span class="line">            mockedStatics.set(interceptors);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return new InlineStaticMockControl&lt;&gt;(type, interceptors, settings, handler);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>对应的static方法被修改后的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public static String getName() &#123;</span><br><span class="line">    MockMethodDispatcher var0 = MockMethodDispatcher.getStatic(&quot;iYgGsWev&quot;, TestDate.class);</span><br><span class="line">    Callable var2 = var0 != null &amp;&amp; var0.isMockedStatic(TestDate.class) ? var0.handleStatic(TestDate.class, TestDate.class.getMethod(&quot;getName&quot;), new Object[0]) : null;</span><br><span class="line">    String var1 = var2 != null ? null : &quot;dengqi&quot;;</span><br><span class="line">    if (var2 != null) &#123;</span><br><span class="line">        var1 = (String)var2.call();</span><br><span class="line">    &#125;</span><br><span class="line">    return var1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的代码中可以看出，mock static和mock final的区别并不大，主要是存储class和对应的MockMethodInterceptor的关系，但是它们所使用的的map确并不相同，static使用的是ThreadLocal的map，其部分代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * &lt;p&gt;</span><br><span class="line"> * A detached local that allows for explicit control of setting and removing values from a thread-local</span><br><span class="line"> * context.</span><br><span class="line"> * &lt;/p&gt;</span><br><span class="line"> * Instances of this class are non-blocking and fully thread safe.</span><br><span class="line"> */</span><br><span class="line">public class DetachedThreadLocal&lt;T&gt; implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    final WeakConcurrentMap&lt;Thread, T&gt; map;</span><br></pre></td></tr></table></figure>
+<p>这是Mockito自己实现的一个ThreadLocal，主要保证没有阻塞以及多线程安全。</p>
+<p>所以整体来说static没有对应的对象实例，所以保存的是class与MockMethodInterceptor的关系，并且通过使用ThreadLocal来避免影响其他线程，但是同样也要注意，本线程内对static方法的mock对其他线程没有效果。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6/" rel="tag"># 单元测试框架</a>
+              <a href="/tags/Mockito/" rel="tag"># Mockito</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/27/Mockito%E4%B8%ADmock%20static%E6%96%B9%E6%B3%95%E6%97%B6%EF%BC%8C%E6%B2%A1%E6%9C%89%E6%8C%87%E5%AE%9A%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%85%B6%E4%BB%96%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E8%BF%94%E5%9B%9E%E7%A9%BA%E5%80%BC%E4%BB%A5%E5%8F%8A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%A4%9F%E5%9C%A8try%E4%BB%A3%E7%A0%81%E5%9D%97%E4%B9%8B%E5%A4%96mock/" rel="prev" title="Mockito中mock static方法时，没有指定返回值的其他静态方法为什么会返回空值以及为什么不能够在try代码块之外mock">
+      <i class="fa fa-chevron-left"></i> Mockito中mock static方法时，没有指定返回值的其他静态方法为什么会返回空值以及为什么不能够在try代码块之外mock
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mock-Final"><span class="nav-number">1.</span> <span class="nav-text">Mock Final</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mock-static"><span class="nav-number">2.</span> <span class="nav-text">Mock static</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">邓琦</p>
+  <div class="site-description" itemprop="description">学习源码，才能学习到最“纯正”的技术原理</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">邓琦</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

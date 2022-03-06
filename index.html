@@ -115,6 +115,11 @@
     <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
         <li class="menu-item menu-item-tags">
 
     <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
@@ -157,6 +162,81 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="邓琦">
+      <meta itemprop="description" content="学习源码，才能学习到最“纯正”的技术原理">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="探索真相的小白">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/" class="post-title-link" itemprop="url">Mockito怎么mock final方法和static方法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-06 20:07:02 / 修改时间：20:19:48" itemprop="dateCreated datePublished" datetime="2022-03-06T20:07:02+08:00">2022-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mockito%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">Mockito相关源码</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Mockito mock一个方法主要是通过继承指定类，然后覆写对应的类，来达到逻辑控制的目的。但是对应final和static方法时没有办法通过继承来控制对应方法的逻辑的。所以我这里去查看了相关的一些源码，来查看相应的一些原理。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/27/Mockito%E4%B8%ADmock%20static%E6%96%B9%E6%B3%95%E6%97%B6%EF%BC%8C%E6%B2%A1%E6%9C%89%E6%8C%87%E5%AE%9A%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%85%B6%E4%BB%96%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E8%BF%94%E5%9B%9E%E7%A9%BA%E5%80%BC%E4%BB%A5%E5%8F%8A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%A4%9F%E5%9C%A8try%E4%BB%A3%E7%A0%81%E5%9D%97%E4%B9%8B%E5%A4%96mock/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -180,10 +260,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-02-27 20:14:45 / 修改时间：20:22:23" itemprop="dateCreated datePublished" datetime="2022-02-27T20:14:45+08:00">2022-02-27</time>
+              <time title="创建时间：2022-02-27 20:14:45" itemprop="dateCreated datePublished" datetime="2022-02-27T20:14:45+08:00">2022-02-27</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-06 20:25:06" itemprop="dateModified" datetime="2022-03-06T20:25:06+08:00">2022-03-06</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -205,23 +291,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="未Mock的static方法为什么返回空值"><a href="#未Mock的static方法为什么返回空值" class="headerlink" title="未Mock的static方法为什么返回空值"></a>未Mock的static方法为什么返回空值</h2><p>在mock类中的静态方法时，如果其中有多个静态方法，且我们只指定了其中一个方法的返回值时，会发现调用其他的静态方法的返回值都变成空值。</p>
-<p>测试时用的代码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 目标类</span><br><span class="line">public class TestDate &#123;</span><br><span class="line">    public static String getName() &#123;</span><br><span class="line">        return &quot;dengqi&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    public static String getTest() &#123;</span><br><span class="line">        return &quot;123&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 测试方法</span><br><span class="line">@Test</span><br><span class="line">public void test() &#123;</span><br><span class="line">    try (MockedStatic&lt;TestDate&gt; theMock = Mockito.mockStatic(TestDate.class)) &#123;</span><br><span class="line">        theMock.when(TestDate::getName).thenReturn(&quot;test&quot;);</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getTest());</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">// 测试方法的执行结果如下</span><br><span class="line">main:null</span><br><span class="line">main:test</span><br><span class="line">main:dengqi</span><br></pre></td></tr></table></figure>
-
-<p>Mockito在mock static方法时，是修改了原static方法的实现的，代码解析后如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static String getName() &#123;</span><br><span class="line">    MockMethodDispatcher var0 = MockMethodDispatcher.getStatic(&quot;IF7HxPjf&quot;, TestDate.class);</span><br><span class="line">    Callable var2 = var0 != null &amp;&amp; var0.isMockedStatic(TestDate.class) ? var0.handleStatic(TestDate.class, TestDate.class.getMethod(&quot;getName&quot;), new Object[0]) : null;</span><br><span class="line">    String var1 = var2 != null ? null : &quot;dengqi&quot;;</span><br><span class="line">    if (var2 != null) &#123;</span><br><span class="line">        var1 = (String)var2.call();</span><br><span class="line">    &#125;</span><br><span class="line">    return var1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static String getTest() &#123;</span><br><span class="line">    MockMethodDispatcher var0 = MockMethodDispatcher.getStatic(&quot;IF7HxPjf&quot;, TestDate.class);</span><br><span class="line">    Callable var2 = var0 != null &amp;&amp; var0.isMockedStatic(TestDate.class) ? var0.handleStatic(TestDate.class, TestDate.class.getMethod(&quot;getTest&quot;), new Object[0]) : null;</span><br><span class="line">    String var1 = var2 != null ? null : &quot;123&quot;;</span><br><span class="line">    if (var2 != null) &#123;</span><br><span class="line">        var1 = (String)var2.call();</span><br><span class="line">    &#125;</span><br><span class="line">    return var1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>其中的核心就是MockMethodDispatcher的isMockedStatic方法和handleStatic方法，这两个的具体实现如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public boolean isMockedStatic(Class&lt;?&gt; type) &#123;</span><br><span class="line">    if (!this.selfCallInfo.checkSelfCall(type)) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        Map&lt;Class&lt;?&gt;, ?&gt; interceptors = (Map)this.mockedStatics.get();</span><br><span class="line">        return interceptors != null &amp;&amp; interceptors.containsKey(type);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public Callable&lt;?&gt; handleStatic(Class&lt;?&gt; type, Method origin, Object[] arguments) throws Throwable &#123;</span><br><span class="line">    Map&lt;Class&lt;?&gt;, MockMethodInterceptor&gt; interceptors = (Map)this.mockedStatics.get();</span><br><span class="line">    return interceptors != null &amp;&amp; interceptors.containsKey(type) ? </span><br><span class="line">        new MockMethodAdvice.ReturnValueWrapper(((MockMethodInterceptor)interceptors.get(type))</span><br><span class="line">            // 这里是核心方法，通过获取到的MockMethodInterceptor来执行对应的mock逻辑</span><br><span class="line">            .doIntercept(type, origin, arguments, new MockMethodAdvice</span><br><span class="line">                .StaticMethodCall(this.selfCallInfo, type, origin, arguments), new LocationImpl(new Throwable(), true))) </span><br><span class="line">       : null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到isMockedStatic的核心就是判断interceptors中是否有当前这个类，而这个类是在什么时候被添加到interceptors中呢？其实就是在try语句块中的mockStatic时被添加到interceptors中的。代码核心如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public &lt;T&gt; MockedStatic&lt;T&gt; mockStatic(Class&lt;T&gt; classToMock, MockSettings settings) &#123;</span><br><span class="line">    if (!MockSettingsImpl.class.isInstance(settings)) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;Unexpected implementation of &#x27;&quot; + settings.getClass().getCanonicalName() + &quot;&#x27;\nAt the moment, you cannot provide your own implementations of that class.&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        MockSettingsImpl impl = (MockSettingsImpl)MockSettingsImpl.class.cast(settings);</span><br><span class="line">        MockCreationSettings&lt;T&gt; creationSettings = impl.buildStatic(classToMock);</span><br><span class="line">        StaticMockControl&lt;T&gt; control = MockUtil.createStaticMock(classToMock, creationSettings);</span><br><span class="line">        // control是一个核心类，存储了核心的一些数据， 代码在后面</span><br><span class="line">        control.enable();</span><br><span class="line">        ThreadSafeMockingProgress.mockingProgress().mockingStarted(classToMock, creationSettings);</span><br><span class="line">        return new MockedStaticImpl(control);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static class InlineStaticMockControl&lt;T&gt; implements StaticMockControl&lt;T&gt; &#123;</span><br><span class="line">    private final Class&lt;T&gt; type;</span><br><span class="line">    private final Map&lt;Class&lt;?&gt;, MockMethodInterceptor&gt; interceptors;</span><br><span class="line">    private final MockCreationSettings&lt;T&gt; settings;</span><br><span class="line">    private final MockHandler handler;</span><br><span class="line">    ......</span><br><span class="line">    // 这个方法会将当前代理的类作为key值放入到interceptors中，这样在后面isMockStatic时则能够查到相应的key</span><br><span class="line">    public void enable() &#123;</span><br><span class="line">        if (this.interceptors.putIfAbsent(this.type, new MockMethodInterceptor(this.handler, this.settings)) != null) &#123;</span><br><span class="line">            throw new MockitoException(StringUtil.join(new Object[]&#123;&quot;For &quot; + this.type.getName() + &quot;, static mocking is already registered in the current thread&quot;, &quot;&quot;, &quot;To create a new mock, the existing static mock registration must be deregistered&quot;&#125;));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 这里是在退出的时候将相应的数据删除，不影响原来的静态方法的执行</span><br><span class="line">    public void disable() &#123;</span><br><span class="line">        if (this.interceptors.remove(this.type) == null) &#123;</span><br><span class="line">            throw new MockitoException(StringUtil.join(new Object[]&#123;&quot;Could not deregister &quot; + this.type.getName() + &quot; as a static mock since it is not currently registered&quot;, &quot;&quot;, &quot;To register a static mock, use Mockito.mockStatic(&quot; + this.type.getSimpleName() + &quot;.class)&quot;&#125;));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>所以在我们开启静态方法mock过后，不管方法有没有被我们指定返回值，都会进入到handleStatic方法中，然后调用到doInterceptor。<br><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/mockito-static-null.PNG" alt="image"><br>从上面可以看出，handle中存储的是我们之前mock了返回值的方法的一些信息，其最终会调用到MockHandlerImpl的代码，如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">    public Object handle(Invocation invocation) throws Throwable &#123;</span><br><span class="line">        if (this.invocationContainer.hasAnswersForStubbing()) &#123;</span><br><span class="line">            ......</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            ......</span><br><span class="line">            // 这里是判断当前的调用方法是否有对应的返回值</span><br><span class="line">            StubbedInvocationMatcher stubbing = this.invocationContainer.findAnswerFor(invocation);</span><br><span class="line">            StubbingLookupNotifier.notifyStubbedAnswerLookup(invocation, stubbing, this.invocationContainer.getStubbingsAscending(), (CreationSettings)this.mockSettings);</span><br><span class="line">            Object ret;</span><br><span class="line">            // 如果返回值不为空，则返回对应的返回值</span><br><span class="line">            if (stubbing != null) &#123;</span><br><span class="line">                stubbing.captureArgumentsFrom(invocation);</span><br><span class="line">                try &#123;</span><br><span class="line">                    ret = stubbing.answer(invocation);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    ThreadSafeMockingProgress.mockingProgress().reportOngoingStubbing(ongoingStubbing);</span><br><span class="line">                &#125;</span><br><span class="line">                return ret;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                // 没有设置对应的返回值，则给出一个默认的，这里的一个默认实现是ReturnsEmptyValues</span><br><span class="line">                ret = this.mockSettings.getDefaultAnswer().answer(invocation);</span><br><span class="line">                DefaultAnswerValidator.validateReturnValueFor(invocation, ret);</span><br><span class="line">                this.invocationContainer.resetInvocationForPotentialStubbing(invocationMatcher);</span><br><span class="line">                return ret;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">public class ReturnsEmptyValues implements Answer&lt;Object&gt;, Serializable &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public Object answer(InvocationOnMock invocation) &#123;</span><br><span class="line">        ......</span><br><span class="line">        Class&lt;?&gt; returnType = invocation.getMethod().getReturnType();</span><br><span class="line">        return returnValueFor(returnType);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Object returnValueFor(Class&lt;?&gt; type) &#123;</span><br><span class="line">        if (Primitives.isPrimitiveOrWrapper(type)) &#123;</span><br><span class="line">            return Primitives.defaultValue(type);</span><br><span class="line">        &#125; else if (type == Iterable.class) &#123;</span><br><span class="line">            return new ArrayList&lt;&gt;(0);</span><br><span class="line">        &#125; else if (type == Collection.class) &#123;</span><br><span class="line">            return new LinkedList&lt;&gt;();</span><br><span class="line">        &#125; else if (type == Set.class) &#123;</span><br><span class="line">            return new HashSet&lt;&gt;();</span><br><span class="line">        &#125; else if (type == Map.class) &#123;</span><br><span class="line">            return new HashMap&lt;&gt;();</span><br><span class="line">        &#125; else if (type == HashMap.class) &#123;</span><br><span class="line">            return new HashMap&lt;&gt;();</span><br><span class="line">        &#125; else if (type == SortedMap.class) &#123;</span><br><span class="line">            return new TreeMap&lt;&gt;();</span><br><span class="line">        &#125; else if (type == TreeMap.class) &#123;</span><br><span class="line">            return new TreeMap&lt;&gt;();</span><br><span class="line">        &#125; else if (type == LinkedHashMap.class) &#123;</span><br><span class="line">            return new LinkedHashMap&lt;&gt;();</span><br><span class="line">        &#125; ......</span><br><span class="line"></span><br><span class="line">        // Let&#x27;s not care about the rest of collections.</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>又因为我的方法返回值是String类型，不在上面的判断条件中，最终就返回了null值。</p>
-<h2 id="方法块外面为什么不能进行mock"><a href="#方法块外面为什么不能进行mock" class="headerlink" title="方法块外面为什么不能进行mock"></a>方法块外面为什么不能进行mock</h2><p>这个问题上面也有解释到，主要是在InlineStaticMockControl中的disable方法已经被调用了，删除了对应Mock类的数据，所以相应的isMockStatic方法判断返回false，最终返回我们原来给到的值。这一点可以从测试方法的字节码被反解析后看出来：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">// 原方法</span><br><span class="line">@Test</span><br><span class="line">public void test() &#123;</span><br><span class="line">    try (MockedStatic&lt;TestDate&gt; theMock = Mockito.mockStatic(TestDate.class)) &#123;</span><br><span class="line">        theMock.when(TestDate::getName).thenReturn(&quot;test&quot;);</span><br><span class="line"></span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getTest());</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 反解析后的</span><br><span class="line">@Test</span><br><span class="line">public void test() &#123;</span><br><span class="line">    MockedStatic&lt;TestDate&gt; theMock = Mockito.mockStatic(TestDate.class);</span><br><span class="line">    Throwable var2 = null;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        theMock.when(TestDate::getName).thenReturn(&quot;test&quot;);</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getTest());</span><br><span class="line">        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">    &#125; catch (Throwable var11) &#123;</span><br><span class="line">        var2 = var11;</span><br><span class="line">        throw var11;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        if (theMock != null) &#123;</span><br><span class="line">            if (var2 != null) &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    theMock.close();</span><br><span class="line">                &#125; catch (Throwable var10) &#123;</span><br><span class="line">                    var2.addSuppressed(var10);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                theMock.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(Thread.currentThread().getName() + &quot;:&quot; + TestDate.getName());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// close方法的实现在MockedStaticImpl中</span><br><span class="line">@Override</span><br><span class="line">public void close() &#123;</span><br><span class="line">    assertNotClosed();</span><br><span class="line"></span><br><span class="line">    closed = true;</span><br><span class="line">    // 在这里调用disable方法，删除对应的信息</span><br><span class="line">    control.disable();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p>我们在使用Mockito来mock静态方法时，会发现，在同一个类中如果存在多个静态方法，我们如果只指定了一个静态方法的返回值，其他的方法都会<br>返回一个默认的空值，而且如果我们在try代码块之外去调用静态方法，会发现我们的mock失效了，这些问题我都在源码中去找到了答案。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/27/Mockito%E4%B8%ADmock%20static%E6%96%B9%E6%B3%95%E6%97%B6%EF%BC%8C%E6%B2%A1%E6%9C%89%E6%8C%87%E5%AE%9A%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%85%B6%E4%BB%96%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E8%BF%94%E5%9B%9E%E7%A9%BA%E5%80%BC%E4%BB%A5%E5%8F%8A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%A4%9F%E5%9C%A8try%E4%BB%A3%E7%A0%81%E5%9D%97%E4%B9%8B%E5%A4%96mock/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -302,7 +380,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">2</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
