@@ -162,6 +162,81 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/23/Netty%E7%9A%84Local-Channel%E5%BA%95%E5%B1%82%E4%BC%A0%E8%BE%93%E9%80%BB%E8%BE%91%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="邓琦">
+      <meta itemprop="description" content="学习源码，才能学习到最“纯正”的技术原理">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="探索真相的小白">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/23/Netty%E7%9A%84Local-Channel%E5%BA%95%E5%B1%82%E4%BC%A0%E8%BE%93%E9%80%BB%E8%BE%91%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Netty的Local Channel底层传输逻辑实现</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-23 21:56:11 / 修改时间：22:14:48" itemprop="dateCreated datePublished" datetime="2022-03-23T21:56:11+08:00">2022-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Netty%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">Netty学习</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Netty中有着多种不同的channel实现，而LocalChannel则是针对在同一个虚拟机上的数据传输。它是通过内存中的对象来进行数据通信的，所以并不会占用相应的端口以及网络资源。所以我们可以通过LocalChannel来在单机的情况下使用netty的线程架构，并且能够在修改极少代码的情况切换传输方式。所以我深入查看了下其实现源码。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/23/Netty%E7%9A%84Local-Channel%E5%BA%95%E5%B1%82%E4%BC%A0%E8%BE%93%E9%80%BB%E8%BE%91%E5%AE%9E%E7%8E%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/06/Mockito%E6%80%8E%E4%B9%88mock-final%E6%96%B9%E6%B3%95%E5%92%8Cstatic%E6%96%B9%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -380,20 +455,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
