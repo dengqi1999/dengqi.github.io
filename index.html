@@ -162,6 +162,81 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/04/Spring-Aop%E5%88%87%E9%9D%A2%E6%97%A0%E6%B3%95%E4%BB%A3%E7%90%86%E5%86%85%E9%83%A8%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="邓琦">
+      <meta itemprop="description" content="学习源码，才能学习到最“纯正”的技术原理">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="探索真相的小白">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/04/Spring-Aop%E5%88%87%E9%9D%A2%E6%97%A0%E6%B3%95%E4%BB%A3%E7%90%86%E5%86%85%E9%83%A8%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">Spring Aop切面无法代理内部调用问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-04 17:27:26 / 修改时间：17:37:37" itemprop="dateCreated datePublished" datetime="2022-04-04T17:27:26+08:00">2022-04-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">Spring学习</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>我在学习spring的AOP的时候发现了一个问题，就是它无法针对内部方法调用进行代理，无论是private方法还是非private方法。但是针对非private方法如果使用cglib（spring支持JDK的动态代理和cglib动态代理）来基于子类进行代理的情况下，<br>其实是可以代理内部调用的。所以我就查看了下两者有什么不同。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/04/Spring-Aop%E5%88%87%E9%9D%A2%E6%97%A0%E6%B3%95%E4%BB%A3%E7%90%86%E5%86%85%E9%83%A8%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/04/Netty%E7%9A%84FastThreadLocal/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -922,7 +997,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -935,7 +1010,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
