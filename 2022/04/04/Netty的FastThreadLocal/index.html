@@ -20,16 +20,17 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="article">
+  <meta name="description" content="java原生是提供了ThreadLocal的实现的，可以实现线程内的数据传递。但是Netty框架却又提供了自己的FastThreadLocal。这主要是因为原生的ThreadLocal有一些缺点。  Thread中的ThreadLocalMap采用线性探测的方式来解决hash冲突 ThreadLocal容易出现内存泄漏，因为ThreadLocalMap的value是强引用，导致对应的对象可能无法被">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Netty的FastThreadLocal">
 <meta property="og:url" content="http://example.com/2022/04/04/Netty%E7%9A%84FastThreadLocal/index.html">
 <meta property="og:site_name" content="探索真相的小白">
+<meta property="og:description" content="java原生是提供了ThreadLocal的实现的，可以实现线程内的数据传递。但是Netty框架却又提供了自己的FastThreadLocal。这主要是因为原生的ThreadLocal有一些缺点。  Thread中的ThreadLocalMap采用线性探测的方式来解决hash冲突 ThreadLocal容易出现内存泄漏，因为ThreadLocalMap的value是强引用，导致对应的对象可能无法被">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-04-04T09:12:55.000Z">
-<meta property="article:modified_time" content="2022-04-04T09:12:55.820Z">
+<meta property="article:modified_time" content="2022-04-04T09:21:49.331Z">
 <meta property="article:author" content="邓琦">
-<meta property="article:tag" content="标签">
-<meta property="article:tag" content="其他">
+<meta property="article:tag" content="ThreadLocal拓展">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://example.com/2022/04/04/Netty%E7%9A%84FastThreadLocal/">
@@ -187,8 +188,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-04-04 17:12:55" itemprop="dateCreated datePublished" datetime="2022-04-04T17:12:55+08:00">2022-04-04</time>
+              <time title="创建时间：2022-04-04 17:12:55 / 修改时间：17:21:49" itemprop="dateCreated datePublished" datetime="2022-04-04T17:12:55+08:00">2022-04-04</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -196,7 +198,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%88%86%E7%B1%BB/" itemprop="url" rel="index"><span itemprop="name">分类</span></a>
+                  <a href="/categories/Netty%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">Netty学习</span></a>
                 </span>
             </span>
 
@@ -211,7 +213,23 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <span id="more"></span>
+        <p>java原生是提供了ThreadLocal的实现的，可以实现线程内的数据传递。但是Netty框架却又提供了自己的<br>FastThreadLocal。这主要是因为原生的ThreadLocal有一些缺点。</p>
+<ul>
+<li>Thread中的ThreadLocalMap采用线性探测的方式来解决hash冲突</li>
+<li>ThreadLocal容易出现内存泄漏，因为ThreadLocalMap的value是强引用，导致对应的对象可能无法被回收</li>
+</ul>
+<p>而FastThreadLocal主要就是解决了上面的两个缺点。</p>
+<span id="more"></span>
+
+<p>它首先是自己实现了一个InternalThreadLocalMap，<br>然后又拓展了Thread类，实现了一个FastThreadLocalThread，在其中添加了InternalThreadLocalMap<br>属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * A special &#123;<span class="doctag">@link</span> Thread&#125; that provides fast access to &#123;<span class="doctag">@link</span> FastThreadLocal&#125; variables.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FastThreadLocalThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="comment">// 拓展了Thread的属性</span></span><br><span class="line">    <span class="keyword">private</span> InternalThreadLocalMap threadLocalMap;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而InternalThreadLocalMap内部，则是维护了一个AtomicInteger的nextIndex变量，然后我们每次新建<br>FastThreadLocal都会获取一个index，然后将map中的index增加。这样我们创建的每个FastThreadLocal<br>对象都会有一个唯一的index，这样就能够极大的减少冲突的发生，并且访问的时候也能够快速访问对应的数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">InternalThreadLocalMap</span> <span class="keyword">extends</span> <span class="title class_">UnpaddedInternalThreadLocalMap</span> &#123;</span><br><span class="line">    <span class="comment">// 这个属性是在UnpaddedInternalThreadLocalMap中</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">AtomicInteger</span> <span class="variable">nextIndex</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">nextVariableIndex</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> nextIndex.getAndIncrement();</span><br><span class="line">      <span class="keyword">if</span> (index &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        nextIndex.decrementAndGet();</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;too many thread-local indexed variables&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> index;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FastThreadLocal</span>&lt;V&gt; &#123;</span><br><span class="line">    <span class="comment">// 当前类对应的index</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">int</span> index;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">FastThreadLocal</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 获取唯一的index</span></span><br><span class="line">        index = InternalThreadLocalMap.nextVariableIndex();</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns the current value for the current thread</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> V <span class="title function_">get</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="type">InternalThreadLocalMap</span> <span class="variable">threadLocalMap</span> <span class="operator">=</span> InternalThreadLocalMap.get();</span><br><span class="line">      <span class="comment">// 获取对应值的时候，就使用index去获取值</span></span><br><span class="line">      <span class="type">Object</span> <span class="variable">v</span> <span class="operator">=</span> threadLocalMap.indexedVariable(index);</span><br><span class="line">      <span class="keyword">if</span> (v != InternalThreadLocalMap.UNSET) &#123;</span><br><span class="line">        <span class="keyword">return</span> (V) v;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> initialize(threadLocalMap);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Set the value for the current thread.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title function_">set</span><span class="params">(V value)</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (value != InternalThreadLocalMap.UNSET) &#123;</span><br><span class="line">        <span class="type">InternalThreadLocalMap</span> <span class="variable">threadLocalMap</span> <span class="operator">=</span> InternalThreadLocalMap.get();</span><br><span class="line">        setKnownNotUnset(threadLocalMap, value);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        remove();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> see &#123;<span class="doctag">@link</span> InternalThreadLocalMap#setIndexedVariable(int, Object)&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">setKnownNotUnset</span><span class="params">(InternalThreadLocalMap threadLocalMap, V value)</span> &#123;</span><br><span class="line">      <span class="comment">// 设置对应值的时候，就使用index去设置</span></span><br><span class="line">      <span class="keyword">if</span> (threadLocalMap.setIndexedVariable(index, value)) &#123;</span><br><span class="line">        addToVariablesToRemove(threadLocalMap, <span class="built_in">this</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样来减少线性探测冲突大的时候，带来的耗时浪费。</p>
+<p>同时还有另一个缺点，就是内存泄漏的问题。对于这个问题，FastThreadLocal 不仅提供了remove()主动清除对象的方法，<br>而且在线程池场景中 Netty 还封装了 FastThreadLocalRunnable，FastThreadLocalRunnable最后会<br>执行 FastThreadLocal.removeAll() 将Set集合中所有FastThreadLocal对象都清理掉。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">FastThreadLocalRunnable</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Runnable runnable;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">FastThreadLocalRunnable</span><span class="params">(Runnable runnable)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.runnable = ObjectUtil.checkNotNull(runnable, <span class="string">&quot;runnable&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            runnable.run();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 在这里调用FastThreadLocal的清理方法</span></span><br><span class="line">            FastThreadLocal.removeAll();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> Runnable <span class="title function_">wrap</span><span class="params">(Runnable runnable)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> runnable <span class="keyword">instanceof</span> FastThreadLocalRunnable ? runnable : <span class="keyword">new</span> <span class="title class_">FastThreadLocalRunnable</span>(runnable);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
     </div>
 
     
@@ -220,8 +238,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%A0%87%E7%AD%BE/" rel="tag"># 标签</a>
-              <a href="/tags/%E5%85%B6%E4%BB%96/" rel="tag"># 其他</a>
+              <a href="/tags/ThreadLocal%E6%8B%93%E5%B1%95/" rel="tag"># ThreadLocal拓展</a>
           </div>
 
         
@@ -312,13 +329,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

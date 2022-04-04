@@ -185,8 +185,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-04-04 17:12:55" itemprop="dateCreated datePublished" datetime="2022-04-04T17:12:55+08:00">2022-04-04</time>
+              <time title="创建时间：2022-04-04 17:12:55 / 修改时间：17:21:49" itemprop="dateCreated datePublished" datetime="2022-04-04T17:12:55+08:00">2022-04-04</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -194,7 +195,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%88%86%E7%B1%BB/" itemprop="url" rel="index"><span itemprop="name">分类</span></a>
+                  <a href="/categories/Netty%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">Netty学习</span></a>
                 </span>
             </span>
 
@@ -209,7 +210,20 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <span id="more"></span>
+          <p>java原生是提供了ThreadLocal的实现的，可以实现线程内的数据传递。但是Netty框架却又提供了自己的<br>FastThreadLocal。这主要是因为原生的ThreadLocal有一些缺点。</p>
+<ul>
+<li>Thread中的ThreadLocalMap采用线性探测的方式来解决hash冲突</li>
+<li>ThreadLocal容易出现内存泄漏，因为ThreadLocalMap的value是强引用，导致对应的对象可能无法被回收</li>
+</ul>
+<p>而FastThreadLocal主要就是解决了上面的两个缺点。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/04/Netty%E7%9A%84FastThreadLocal/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -915,13 +929,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
