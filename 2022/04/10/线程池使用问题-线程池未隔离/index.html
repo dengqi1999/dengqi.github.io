@@ -20,24 +20,23 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Spring的事件通知机制是一项很有用的功能，使用事件机制我们可以将相互耦合的代码解耦，从而方便功能的修改与添加。并且也可以监听现有的一些事件，来拓展相应的功能。我这里就去看了下对应的一些实现。">
+  <meta name="description" content="之前在使用线程池的时候遇到了一个问题，就是线程池不执行任务了。但是在代码中是没有使用锁的，是应该不会出现死锁的。所以出现问题的原因就是任务中存在join，并且会提交子任务，导致线程池卡死。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Spring Event事件机制">
-<meta property="og:url" content="http://example.com/2022/03/27/Spring-Event%E4%BA%8B%E4%BB%B6%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:title" content="线程池使用问题-线程池未隔离">
+<meta property="og:url" content="http://example.com/2022/04/10/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%9C%AA%E9%9A%94%E7%A6%BB/index.html">
 <meta property="og:site_name" content="探索真相的小白">
-<meta property="og:description" content="Spring的事件通知机制是一项很有用的功能，使用事件机制我们可以将相互耦合的代码解耦，从而方便功能的修改与添加。并且也可以监听现有的一些事件，来拓展相应的功能。我这里就去看了下对应的一些实现。">
+<meta property="og:description" content="之前在使用线程池的时候遇到了一个问题，就是线程池不执行任务了。但是在代码中是没有使用锁的，是应该不会出现死锁的。所以出现问题的原因就是任务中存在join，并且会提交子任务，导致线程池卡死。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Spring_Event_%E7%B1%BB%E5%9B%BE.png">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Spring_Event_%E6%97%B6%E5%BA%8F%E5%9B%BE.png">
-<meta property="article:published_time" content="2022-03-27T04:03:08.000Z">
-<meta property="article:modified_time" content="2022-03-27T04:39:25.642Z">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90.PNG">
+<meta property="article:published_time" content="2022-04-10T06:20:41.000Z">
+<meta property="article:modified_time" content="2022-04-10T06:36:23.800Z">
 <meta property="article:author" content="邓琦">
-<meta property="article:tag" content="Spring">
-<meta property="article:tag" content="事件">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="线程池">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Spring_Event_%E7%B1%BB%E5%9B%BE.png">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90.PNG">
 
-<link rel="canonical" href="http://example.com/2022/03/27/Spring-Event%E4%BA%8B%E4%BB%B6%E6%9C%BA%E5%88%B6/">
+<link rel="canonical" href="http://example.com/2022/04/10/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%9C%AA%E9%9A%94%E7%A6%BB/">
 
 
 <script id="page-configurations">
@@ -50,7 +49,7 @@
   };
 </script>
 
-  <title>Spring Event事件机制 | 探索真相的小白</title>
+  <title>线程池使用问题-线程池未隔离 | 探索真相的小白</title>
   
 
 
@@ -170,7 +169,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/27/Spring-Event%E4%BA%8B%E4%BB%B6%E6%9C%BA%E5%88%B6/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/10/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%9C%AA%E9%9A%94%E7%A6%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -183,7 +182,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Spring Event事件机制
+          线程池使用问题-线程池未隔离
         </h1>
 
         <div class="post-meta">
@@ -194,7 +193,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-03-27 12:03:08 / 修改时间：12:39:25" itemprop="dateCreated datePublished" datetime="2022-03-27T12:03:08+08:00">2022-03-27</time>
+              <time title="创建时间：2022-04-10 14:20:41 / 修改时间：14:36:23" itemprop="dateCreated datePublished" datetime="2022-04-10T14:20:41+08:00">2022-04-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -202,7 +201,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">Spring学习</span></a>
+                  <a href="/categories/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" itemprop="url" rel="index"><span itemprop="name">线程池</span></a>
                 </span>
             </span>
 
@@ -217,14 +216,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>Spring的事件通知机制是一项很有用的功能，使用事件机制我们可以将相互耦合的代码解耦，从而方便功能的修改与添加。并且也可以监听现有的一些事件，来拓展相应的功能。我这里就去看了下对应的一些实现。</p>
+        <p>之前在使用线程池的时候遇到了一个问题，就是线程池不执行任务了。但是在代码中是没有使用锁的，是应该不会出现死锁的。所以出现问题的原因就是任务中存在join，并且会提交子任务，导致线程池卡死。</p>
 <span id="more"></span>
 
-<p><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Spring_Event_%E7%B1%BB%E5%9B%BE.png" alt="image"></p>
-<p>下面这个是注册ApplicationListener的时序图</p>
-<p><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/Spring_Event_%E6%97%B6%E5%BA%8F%E5%9B%BE.png" alt="image"></p>
-<p>然后在发布event上，主要就是调用ApplicationEventPublisher的publishEvent方法，然后ApplicationEventMulticaster的multicastEvent方法被调用，然后获取所有监听这个event的Listener，调用其对应的方法。这里有一个缓存机制，在AbstractApplicationEventMulticaster中：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map&lt;ListenerCacheKey, ListenerRetriever&gt; retrieverCache = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;(<span class="number">64</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> Collection&lt;ApplicationListener&lt;?&gt;&gt; getApplicationListeners(ApplicationEvent event, ResolvableType eventType) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">Object</span> <span class="variable">source</span> <span class="operator">=</span> event.getSource();</span><br><span class="line">    Class&lt;?&gt; sourceType = (source != <span class="literal">null</span> ? source.getClass() : <span class="literal">null</span>);</span><br><span class="line">    <span class="comment">// 根据事件以及其source属性，构建一个key</span></span><br><span class="line">    <span class="type">ListenerCacheKey</span> <span class="variable">cacheKey</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ListenerCacheKey</span>(eventType, sourceType);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Quick check for existing entry on ConcurrentHashMap...</span></span><br><span class="line">    <span class="type">ListenerRetriever</span> <span class="variable">retriever</span> <span class="operator">=</span> <span class="built_in">this</span>.retrieverCache.get(cacheKey);</span><br><span class="line">    <span class="comment">// 如果查找到该事件的listener，直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (retriever != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> retriever.getApplicationListeners();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>.beanClassLoader == <span class="literal">null</span> ||</span><br><span class="line">          (ClassUtils.isCacheSafe(event.getClass(), <span class="built_in">this</span>.beanClassLoader) &amp;&amp;</span><br><span class="line">          (sourceType == <span class="literal">null</span> || ClassUtils.isCacheSafe(sourceType, <span class="built_in">this</span>.beanClassLoader)))) &#123;</span><br><span class="line">        <span class="comment">// 双重检查，保证retrieveApplicationListeners方法只被调用一次，减少消耗，这个方法会检索全部的listener</span></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>.retrievalMutex) &#123;</span><br><span class="line">            retriever = <span class="built_in">this</span>.retrieverCache.get(cacheKey);</span><br><span class="line">            <span class="keyword">if</span> (retriever != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> retriever.getApplicationListeners();</span><br><span class="line">            &#125;</span><br><span class="line">            retriever = <span class="keyword">new</span> <span class="title class_">ListenerRetriever</span>(<span class="literal">true</span>);</span><br><span class="line">            Collection&lt;ApplicationListener&lt;?&gt;&gt; listeners = retrieveApplicationListeners(eventType, sourceType, retriever);</span><br><span class="line">            <span class="comment">// 将对应的Listener缓存起来</span></span><br><span class="line">            <span class="built_in">this</span>.retrieverCache.put(cacheKey, retriever);</span><br><span class="line">            <span class="keyword">return</span> listeners;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/dengqi1999/blog@master/picgo/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90.PNG" alt="image"></p>
+<p>复现问题的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="type">ThreadPoolExecutor</span> <span class="variable">threadPoolExecutor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(<span class="number">10</span>,</span><br><span class="line">            <span class="number">10</span>, <span class="number">30</span>, TimeUnit.SECONDS, <span class="keyword">new</span> <span class="title class_">LinkedBlockingDeque</span>&lt;&gt;(<span class="number">1000</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        List&lt;Integer&gt; data = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">100</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            data.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        List&lt;CompletableFuture&lt;List&lt;String&gt;&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">100</span>);</span><br><span class="line">        <span class="keyword">for</span> (Integer integer : data) &#123;</span><br><span class="line">            CompletableFuture&lt;List&lt;String&gt;&gt; future = CompletableFuture.supplyAsync(() -&gt; submitTask(integer), threadPoolExecutor);</span><br><span class="line">            futures.add(future);</span><br><span class="line">        &#125;</span><br><span class="line">        CompletableFuture&lt;Void&gt; allFuture = CompletableFuture.allOf(futures.toArray(<span class="keyword">new</span> <span class="title class_">CompletableFuture</span>[<span class="number">0</span>]));</span><br><span class="line">        allFuture.thenApply(v -&gt; futures.stream().map(CompletableFuture::join).collect(Collectors.toList())).join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> List&lt;String&gt; <span class="title function_">submitTask</span><span class="params">(<span class="type">int</span> num)</span>&#123;</span><br><span class="line">        List&lt;CompletableFuture&lt;String&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">100</span>);</span><br><span class="line">        CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> num + <span class="string">&quot; SUCCESS&quot;</span>;</span><br><span class="line">            System.out.println(result);</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;, threadPoolExecutor);</span><br><span class="line">        futures.add(future);</span><br><span class="line">        CompletableFuture&lt;Void&gt; allFuture = CompletableFuture.allOf(futures.toArray(<span class="keyword">new</span> <span class="title class_">CompletableFuture</span>[<span class="number">0</span>]));</span><br><span class="line">        <span class="keyword">return</span> allFuture.thenApply(v -&gt; futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))</span><br><span class="line">                .join();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>造成死锁的原因是因为存在资源的竞争。虽然代码逻辑中没有存在资源的竞争，但是线程本身也是一种资源，而任务队列中的任务就是去竞争线程的。然后现在主任务本 身在执行的时候会占用线程资源，但是它却不释放资源，在提交子任务之后，它是阻塞进行等待，并没有释放线程资源，然后提交的子任务拿不到对应的线程，也在一直 等待。</p>
 
     </div>
 
@@ -234,8 +232,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Spring/" rel="tag"># Spring</a>
-              <a href="/tags/%E4%BA%8B%E4%BB%B6/" rel="tag"># 事件</a>
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" rel="tag"># 线程池</a>
           </div>
 
         
@@ -244,13 +242,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/03/26/OpenCsv%E6%8B%93%E5%B1%95%E7%AD%96%E7%95%A5/" rel="prev" title="OpenCsv拓展策略">
-      <i class="fa fa-chevron-left"></i> OpenCsv拓展策略
+    <a href="/2022/04/04/Spring-Aop%E5%88%87%E9%9D%A2%E6%97%A0%E6%B3%95%E4%BB%A3%E7%90%86%E5%86%85%E9%83%A8%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98/" rel="prev" title="Spring Aop切面无法代理内部调用问题">
+      <i class="fa fa-chevron-left"></i> Spring Aop切面无法代理内部调用问题
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/03/27/Spring-Event%E4%BA%8B%E4%BB%B6%E4%BE%8B%E5%AD%90/" rel="next" title="Spring Event事件例子">
-      Spring Event事件例子 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
